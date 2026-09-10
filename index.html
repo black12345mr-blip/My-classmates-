@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบเช็คชื่อ ม.4/2 โรงเรียนสิงห์บุรี</title>
+    <!-- Google Fonts: Sarabun & Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Prompt', 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* Header Card */
+        .app-header {
+            background: linear-gradient(135deg, #4f46e5, #3b82f6);
+            color: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .app-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .app-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .date-picker-wrapper {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-picker-wrapper input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+        .date-picker-wrapper input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        /* Controls Bar (Search & Filter) */
+        .controls-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            background: var(--card-bg);
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: border-color 0.2s;
+        }
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+
+        .filter-select {
+            padding: 12px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            background: var(--card-bg);
+            outline: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        /* Live Counter Bar */
+        .counter-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .counter-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border-top: 4px solid #cbd5e1;
+        }
+        .counter-card.present { border-color: var(--success); }
+        .counter-card.late { border-color: var(--warning); }
+        .counter-card.absent { border-color: var(--danger); }
+        .counter-card.leave { border-color: var(--info); }
+
+        .counter-card .num {
+            font-size: 22px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        .counter-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Layout Grid สำหรับรายชื่อ 2 คอลัมน์ */
+        .roster-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .roster-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            background: #f1f5f9;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .student-item:hover {
+            background: #f8fafc;
+        }
+
+        .student-item:last-child {
+            border-bottom: none;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-no {
+            background: #e0e7ff;
+            color: var(--primary);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .student-details .id {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .student-details .name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .right-control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .note-input {
+            padding: 5px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Prompt', sans-serif;
+            width: 120px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .note-input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Status Buttons (Modern Radio Switcher) */
+        .status-group {
+            display: flex;
+            background: #f1f5f9;
+            padding: 3px;
+            border-radius: 8px;
+            gap: 2px;
+        }
+
+        .status-group label {
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            color: var(--text-muted);
+            user-select: none;
+        }
+
+        .status-group input {
+            display: none;
+        }
+
+        /* Active states for buttons */
+        .status-group input[value="มา"]:checked + label {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        }
+        .status-group input[value="สาย"]:checked + label {
+            background: var(--warning);
+            color: white;
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+        }
+        .status-group input[value="ขาด"]:checked + label {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+        }
+        .status-group input[value="ลา"]:checked + label {
+            background: var(--info);
+            color: white;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Action Footer */
+        .action-footer {
+            margin-top: 30px;
+            text-align: center;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            font-family: 'Prompt', sans-serif;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: var(--text-main);
+            box-shadow: none;
+        }
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-success {
+            background: var(--success);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Modal / Summary popup */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .summary-list {
+            list-style: none;
+            margin: 15px 0 25px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .summary-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .close-modal {
+            width: 100%;
+            padding: 10px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="app-header">
+        <div class="header-top">
+            <div>
+                <h1>ระบบเช็คชื่อนักเรียน ม.4/2</h1>
+                <p>โรงเรียนสิงห์บุรี จ.สิงห์บุรี | ครูที่ปรึกษา: นร. (ชาย 22, หญิง 18, รวม 40 คน)</p>
+            </div>
+            <div class="date-picker-wrapper">
+                <span>📅 วันที่:</span>
+                <input type="date" id="checkDate" onchange="handleDateChange()">
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls: Search & Filter -->
+    <div class="controls-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ค้นหาด้วยชื่อ, นามสกุล หรือรหัสประจำตัว..." oninput="renderRoster()">
+        <select id="filterStatus" class="filter-select" onchange="renderRoster()">
+            <option value="all">สถานะทั้งหมด</option>
+            <option value="มา">มาเรียน</option>
+            <option value="สาย">มาสาย</option>
+            <option value="ขาด">ขาดเรียน</option>
+            <option value="ลา">ลา</option>
+            <option value="">ยังไม่เช็คชื่อ</option>
+        </select>
+    </div>
+
+    <!-- Live Counter -->
+    <div class="counter-bar">
+        <div class="counter-card present">
+            <div class="label">มาเรียน</div>
+            <div class="num" id="countPresent" style="color: var(--success);">0</div>
+        </div>
+        <div class="counter-card late">
+            <div class="label">มาสาย</div>
+            <div class="num" id="countLate" style="color: var(--warning);">0</div>
+        </div>
+        <div class="counter-card absent">
+            <div class="label">ขาดเรียน</div>
+            <div class="num" id="countAbsent" style="color: var(--danger);">0</div>
+        </div>
+        <div class="counter-card leave">
+            <div class="label">ลา</div>
+            <div class="num" id="countLeave" style="color: var(--info);">0</div>
+        </div>
+    </div>
+
+    <form id="attendanceForm">
+        <div class="roster-grid">
+            
+            <!-- ฝั่งซ้าย (เลขที่ 1 - 25) -->
+            <div class="section-box">
+                <div class="section-title">รายชื่อนักเรียน (เลขที่ 1 - 25)</div>
+                <div id="leftRoster"></div>
+            </div>
+
+            <!-- ฝั่งขวา (เลขที่ 26 - 40) -->
+            <div class="section-box">
+                <div class="section-title">รายชื่อนักเรียน (เลขที่ 26 - 40)</div>
+                <div id="rightRoster"></div>
+            </div>
+
+        </div>
+
+        <div class="action-footer">
+            <button type="button" class="btn btn-secondary" onclick="setAllStatus('มา')">ตั้งค่าทั้งหมดเป็น "มา"</button>
+            <button type="button" class="btn btn-success" onclick="exportCSV()">📥 ดาวน์โหลด CSV</button>
+            <button type="button" class="btn" onclick="submitAttendance()">ยืนยันการเช็คชื่อ</button>
+        </div>
+    </form>
+</div>
+
+<!-- Modal สรุปผล -->
+<div class="modal" id="summaryModal">
+    <div class="modal-content">
+        <h3>📊 สรุปผลการเช็คชื่อประจำวัน</h3>
+        <p id="modalDate" style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;"></p>
+        <ul class="summary-list">
+            <li><span>✅ มาเรียนปกติ</span> <strong id="mPresent" style="color: var(--success);">0</strong></li>
+            <li><span>⏰ มาสาย</span> <strong id="mLate" style="color: var(--warning);">0</strong></li>
+            <li><span>❌ ขาดเรียน</span> <strong id="mAbsent" style="color: var(--danger);">0</strong></li>
+            <li><span>✉️ ลา (ป่วย/กิจ)</span> <strong id="mLeave" style="color: var(--info);">0</strong></li>
+        </ul>
+        <button class="close-modal" onclick="closeModal()">ตกลง / ปิดหน้าต่าง</button>
+    </div>
+</div>
+
+<script>
+    const students = [
+        {no: 1, id: "45530", name: "นาย ปัญณพงศ์ วารีญาติ"},
+        {no: 2, id: "45554", name: "นาย กานต์นิธิ กันทิม"},
+        {no: 3, id: "45585", name: "นาย กันต์กวี สอดสี"},
+        {no: 4, id: "45592", name: "นาย ปณิธาน ทัพกฤษณ์"},
+        {no: 5, id: "45594", name: "นาย ภูริวัฒ กลับทอง"},
+        {no: 6, id: "45595", name: "นาย วสุวัฒน์ ธนาโรจน์ปิติพร"},
+        {no: 7, id: "45624", name: "นาย กรวิชญ์ หายทุกข์"},
+        {no: 8, id: "45626", name: "นาย จิรพัทธ์ นุวรรณ์โน"},
+        {no: 9, id: "45628", name: "นาย ทีณพัฒน์ เสมอพันธ์"},
+        {no: 10, id: "45636", name: "นาย นพเก้า คำปลอม"},
+        {no: 11, id: "45641", name: "นาย ภูดิศ ตั้งธงชัยวิริยะ"},
+        {no: 12, id: "45642", name: "นาย ภูบดี ชาดวง"},
+        {no: 13, id: "45645", name: "นาย วิศรุต โสจะยะพันธ์"},
+        {no: 14, id: "45648", name: "นาย ศิวกร จันวัต"},
+        {no: 15, id: "45649", name: "นาย สุธินันท์ ฉาบแก้ว"},
+        {no: 16, id: "45650", name: "นาย หิรัญกฤษฎิ์ ภู่ชัย"},
+        {no: 17, id: "45676", name: "นาย วริศ สุขเอี่ยม"},
+        {no: 18, id: "45711", name: "นาย บุญยกร กุลหกุล"},
+        {no: 19, id: "45869", name: "นาย ณัฏฐรพล พุกธร"},
+        {no: 20, id: "45948", name: "นาย ณพวัฒน์ บุญงามทวีวงศ์"},
+        {no: 21, id: "47772", name: "นาย กฤษดา คงแจ้ง"},
+        {no: 22, id: "47773", name: "นาย จิรภัทร ยุวะนิยม"},
+        {no: 23, id: "45569", name: "น.ส. ชัญญานุช ไวว่อง"},
+        {no: 24, id: "45573", name: "น.ส. นรัชนัน รัชตะไพสิฐ"},
+        {no: 25, id: "45581", name: "น.ส. สัจจาพร ช่วยเกิด"},
+        {no: 26, id: "45603", name: "น.ส. จินต์จุฑา ทองนุ้ย"},
+        {no: 27, id: "45609", name: "น.ส. นรมน มีพันธุ์"},
+        {no: 28, id: "45610", name: "น.ส. นัชชพร คำโต"},
+        {no: 29, id: "45651", name: "น.ส. จีรภา ชินจิตร์"},
+        {no: 30, id: "45653", name: "น.ส. ณัชชานันท์ มีแฝง"},
+        {no: 31, id: "45658", name: "น.ส. พันพัสสา พรหมผล"},
+        {no: 32, id: "45700", name: "น.ส. เมญาวรรณ เมืองช้าง"},
+        {no: 33, id: "45703", name: "น.ส. สลิลดา อยู่ทรัพย์"},
+        {no: 34, id: "45723", name: "น.ส. ชนิภรณ์ รูปหอม"},
+        {no: 35, id: "45726", name: "น.ส. ณัฐจิรา วารีรัตน์"},
+        {no: 36, id: "45776", name: "น.ส. พลอยภคพร ศิลปโชติ"},
+        {no: 37, id: "45778", name: "น.ส. แพรวา นาคสิงห์"},
+        {no: 38, id: "45862", name: "น.ส. อัยยดา พานทอง"},
+        {no: 39, id: "47774", name: "น.ส. ศุภิสรา มณฑา"},
+        {no: 40, id: "47775", name: "น.ส. สุภัสสรา อ่อนนาค"}
+    ];
+
+    // ตั้งค่าวันที่ปัจจุบัน
+    document.getElementById('checkDate').valueAsDate = new Date();
+
+    function getStorageKey() {
+        const dateStr = document.getElementById('checkDate').value;
+        return `attendance_m42_${dateStr}`;
+    }
+
+    function getSavedData() {
+        const data = localStorage.getItem(getStorageKey());
+        return data ? JSON.parse(data) : {};
+    }
+
+    function saveData() {
+        const saved = {};
+        students.forEach(s => {
+            const checked = document.querySelector(`input[name="status_${s.id}"]:checked`);
+            const noteInput = document.getElementById(`note_${s.id}`);
+            saved[s.id] = {
+                status: checked ? checked.value : '',
+                note: noteInput ? noteInput.value : ''
+            };
+        });
+        localStorage.setItem(getStorageKey(), JSON.stringify(saved));
+        updateCounters();
+    }
+
+    function handleDateChange() {
+        renderRoster();
+    }
+
+    function renderRoster() {
+        const leftBox = document.getElementById('leftRoster');
+        const rightBox = document.getElementById('rightRoster');
+        const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+        const filterStatus = document.getElementById('filterStatus').value;
+        const savedData = getSavedData();
+        
+        let leftHtml = '';
+        let rightHtml = '';
+
+        students.forEach(s => {
+            const studentData = savedData[s.id] || { status: '', note: '' };
+            const currentStatus = studentData.status;
+            const currentNote = studentData.note;
+
+            const matchesSearch = s.name.toLowerCase().includes(searchQuery) || s.id.includes(searchQuery) || String(s.no).includes(searchQuery);
+            const matchesFilter = filterStatus === 'all' || currentStatus === filterStatus;
+
+            if (!matchesSearch || !matchesFilter) return;
+
+            const itemHtml = `
+                <div class="student-item" style="width: 100%;">
+                    <div class="student-info">
+                        <div class="student-no">${s.no}</div>
+                        <div class="student-details">
+                            <div class="name">${s.name}</div>
+                            <div class="id">รหัส: ${s.id}</div>
+                        </div>
+                    </div>
+                    <div class="right-control-group">
+                        <input type="text" id="note_${s.id}" class="note-input" placeholder="หมายเหตุ..." value="${currentNote}" oninput="saveData()">
+                        <div class="status-group">
+                            <input type="radio" id="s_${s.id}_มา" name="status_${s.id}" value="มา" ${currentStatus === 'มา' ? 'checked' : ''} onchange="saveData()">
+                            <label for="s_${s.id}_มา">มา</label>
+                            
+                            <input type="radio" id="s_${s.id}_สาย" name="status_${s.id}" value="สาย" ${currentStatus === 'สาย' ? 'checked' : ''} onchange="saveData()">
+                            <label for="s_${s.id}_สาย">สาย</label>
+                            
+                            <input type="radio" id="s_${s.id}_ขาด" name="status_${s.id}" value="ขาด" ${currentStatus === 'ขาด' ? 'checked' : ''} onchange="saveData()">
+                            <label for="s_${s.id}_ขาด">ขาด</label>
+                            
+                            <input type="radio" id="s_${s.id}_ลา" name="status_${s.id}" value="ลา" ${currentStatus === 'ลา' ? 'checked' : ''} onchange="saveData()">
+                            <label for="s_${s.id}_ลา">ลา</label>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (s.no <= 25) {
+                leftHtml += itemHtml;
+            } else {
+                rightHtml += itemHtml;
+            }
+        });
+
+        leftBox.innerHTML = leftHtml || '<div style="padding: 20px; text-align: center; color: var(--text-muted);">ไม่พบข้อมูล</div>';
+        rightBox.innerHTML = rightHtml || '<div style="padding: 20px; text-align: center; color: var(--text-muted);">ไม่พบข้อมูล</div>';
+        updateCounters();
+    }
+
+    function updateCounters() {
+        let counts = { มา: 0, สาย: 0, ขาด: 0, ลา: 0 };
+        students.forEach(s => {
+            const checked = document.querySelector(`input[name="status_${s.id}"]:checked`);
+            if (checked && counts[checked.value] !== undefined) {
+                counts[checked.value]++;
+            }
+        });
+
+        document.getElementById('countPresent').innerText = counts.มา;
+        document.getElementById('countLate').innerText = counts.สาย;
+        document.getElementById('countAbsent').innerText = counts.ขาด;
+        document.getElementById('countLeave').innerText = counts.ลา;
+    }
+
+    function setAllStatus(statusVal) {
+        students.forEach(s => {
+            const radio = document.getElementById(`s_${s.id}_${statusVal}`);
+            if (radio) {
+                radio.checked = true;
+            }
+        });
+        saveData();
+    }
+
+    function exportCSV() {
+        const dateStr = document.getElementById('checkDate').value;
+        let csvContent = "\uFEFFเลขที่,รหัสประจำตัว,ชื่อ-นามสกุล,สถานะ,หมายเหตุ\n";
+
+        students.forEach(s => {
+            const checked = document.querySelector(`input[name="status_${s.id}"]:checked`);
+            const noteInput = document.getElementById(`note_${s.id}`);
+            const status = checked ? checked.value : 'ยังไม่ได้เช็ค';
+            const note = noteInput ? noteInput.value.replace(/,/g, ' ') : '';
+            csvContent += `${s.no},${s.id},"${s.name}",${status},"${note}"\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `attendance_m42_${dateStr}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function submitAttendance() {
+        saveData();
+        let counts = { มา: 0, สาย: 0, ขาด: 0, ลา: 0, uncheck: 0 };
+        students.forEach(s => {
+            const checked = document.querySelector(`input[name="status_${s.id}"]:checked`);
+            if (checked) {
+                counts[checked.value]++;
+            } else {
+                counts.uncheck++;
+            }
+        });
+
+        if (counts.uncheck > 0) {
+            alert(`แจ้งเตือน: ยังมีนักเรียนที่ไม่ได้เช็คชื่ออีก ${counts.uncheck} คน`);
+        }
+
+        const dateStr = document.getElementById('checkDate').value;
+        document.getElementById('modalDate').innerText = `ประจำวันที่: ${dateStr}`;
+        document.getElementById('mPresent').innerText = counts.มา + " คน";
+        document.getElementById('mLate').innerText = counts.สาย + " คน";
+        document.getElementById('mAbsent').innerText = counts.ขาด + " คน";
+        document.getElementById('mLeave').innerText = counts.ลา + " คน";
+
+        document.getElementById('summaryModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('summaryModal').style.display = 'none';
+    }
+
+    window.onload = renderRoster;
+</script>
+
+</body>
+</html>
